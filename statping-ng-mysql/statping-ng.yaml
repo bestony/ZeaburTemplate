@@ -1,0 +1,142 @@
+# yaml-language-server: $schema=https://schema.zeabur.app/template.json
+apiVersion: zeabur.com/v1
+kind: Template
+metadata:
+    name: statping.ng with MySQL
+spec:
+    description: Web and App Status Monitoring for Any Type of Project With MySQL as Database
+    coverImage: https://statping-ng.github.io/assets/img/banner.png
+    icon: https://statping-ng.github.io/assets/img/banner.png
+    tags:
+        - Monitoring
+    readme: |-
+        # Statping-ng - Status Page & Monitoring Server
+
+        > with MySQL as Database
+
+        An easy to use Status Page for your websites and applications. Statping will automatically fetch the application and render a beautiful status page with tons of features for you to build an even better status page. This Status Page generator allows you to use MySQL, Postgres, or SQLite on multiple operating systems.        
+        
+        # UserName and Password
+        - default username: admin
+        - default password: admin
+
+        [Website](https://statping-ng.github.io)|[Wiki](https://github.com/statping-ng/statping-ng/wiki)
+
+    services:
+        - name: MySQL
+          icon: https://raw.githubusercontent.com/zeabur/service-icons/main/marketplace/mysql.svg
+          template: PREBUILT
+          spec:
+            source:
+                image: mysql:8.0.33
+            ports:
+                - id: database
+                  port: 3306
+                  type: TCP
+            volumes:
+                - id: data
+                  dir: /var/lib/mysql
+            instructions:
+                - type: TEXT
+                  title: Command to connect to your MySQL
+                  content: mysqlsh --sql --host=${PORT_FORWARDED_HOSTNAME} --port=${DATABASE_PORT_FORWARDED_PORT} --user=${MYSQL_USERNAME} --password=${MYSQL_PASSWORD} --schema=${MYSQL_DATABASE}
+                - type: TEXT
+                  title: MySQL username
+                  content: ${MYSQL_USERNAME}
+                  category: Credentials
+                - type: PASSWORD
+                  title: MySQL password
+                  content: ${MYSQL_PASSWORD}
+                  category: Credentials
+                - type: TEXT
+                  title: MySQL database
+                  content: ${MYSQL_DATABASE}
+                  category: Credentials
+                - type: TEXT
+                  title: MySQL host
+                  content: ${PORT_FORWARDED_HOSTNAME}
+                  category: Hostname & Port
+                - type: TEXT
+                  title: MySQL port
+                  content: ${DATABASE_PORT_FORWARDED_PORT}
+                  category: Hostname & Port
+            env:
+                MYSQL_DATABASE:
+                    default: zeabur
+                    expose: true
+                MYSQL_HOST:
+                    default: ${CONTAINER_HOSTNAME}
+                    expose: true
+                    readonly: true
+                MYSQL_PASSWORD:
+                    default: ${MYSQL_ROOT_PASSWORD}
+                    expose: true
+                    readonly: true
+                MYSQL_PORT:
+                    default: ${DATABASE_PORT}
+                    expose: true
+                    readonly: true
+                MYSQL_ROOT_PASSWORD:
+                    default: ${PASSWORD}
+                MYSQL_USERNAME:
+                    default: root
+                    expose: true
+                    readonly: true
+            configs:
+                - path: /etc/my.cnf
+                  template: |
+                    [mysqld]
+                    default-authentication-plugin=mysql_native_password
+                    skip-host-cache
+                    skip-name-resolve
+                    datadir=/var/lib/mysql
+                    socket=/var/run/mysqld/mysqld.sock
+                    secure-file-priv=/var/lib/mysql-files
+                    user=mysql
+                    max_allowed_packet=10M
+
+                    pid-file=/var/run/mysqld/mysqld.pid
+                    [client]
+                    socket=/var/run/mysqld/mysqld.sock
+
+                    !includedir /etc/mysql/conf.d/
+                  permission: null
+        - name: statping.ng
+          icon: https://statping-ng.github.io/assets/img/banner.png
+          template: PREBUILT
+          spec:
+            source:
+                image: adamboutcher/statping-ng:latest
+            ports:
+                - id: web
+                  port: 8080
+                  type: HTTP
+            volumes:
+                - id: statping-data
+                  dir: /app
+            env:
+                DB_CONN:
+                    default: mysql
+                DB_HOST:
+                    default: ${MYSQL_HOST}
+                DB_USER:
+                    default: ${MYSQL_USERNAME}
+                DB_PASS:
+                    default: ${MYSQL_PASSWORD}
+                DB_PORT:
+                    default: ${MYSQL_PORT}
+                DB_DATABASE:
+                    default: ${MYSQL_DATABASE}
+               
+localization:
+    zh-CN:
+        description: Statping-ng - 状态页 & 监控服务
+        readme: |
+            一个易于使用的网站和应用程序状态页面。Statping 将自动获取应用程序并呈现一个漂亮的状态页面，具有许多功能，可以帮助您构建更好的状态页面。这个状态页面生成器允许您在多个操作系统上使用 MySQL、Postgres 或 SQLite。
+
+            ## 默认用户名密码
+
+            - 默认用户名: admin
+            - 默认密码: admin
+
+            [Website](https://statping-ng.github.io)|[Wiki](https://github.com/statping-ng/statping-ng/wiki)
