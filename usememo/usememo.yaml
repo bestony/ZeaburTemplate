@@ -1,0 +1,26 @@
+# yaml-language-server: $schema=https://schema.zeabur.app/template.json
+apiVersion: zeabur.com/v1
+kind: Template
+metadata:
+    name: Memos
+spec:
+    description: A privacy-first, lightweight note-taking service
+    icon: https://avatars.githubusercontent.com/u/95764151?s=48&v=4
+    readme: |-
+        # Memos
+        A privacy-first, lightweight note-taking service
+        Easily capture and share your great thoughts.
+    services:
+        - name: Memos
+          icon: https://avatars.githubusercontent.com/u/95764151
+          template: PREBUILT
+          spec:
+            source:
+                image: neosmemo/memos:stable
+            ports:
+                - id: web
+                  port: 5230
+                  type: HTTP
+            volumes:
+                - id: data
+                  dir: /var/opt/memos
